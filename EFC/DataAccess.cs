@@ -10,7 +10,6 @@ public class DataAccess
     public DataAccess()
     {
         context = new MenuContext();
-        context.Database.EnsureCreated();
     }
     
     public async Task CreateDrinksMenuAsync(DrinksMenu drinksMenu)
