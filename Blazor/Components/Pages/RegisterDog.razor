@@ -115,7 +115,7 @@
             description = string.Empty;
 
             await Task.Delay(2000);
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/ViewDogs");
         }
         catch (Exception ex)
         {
@@ -125,6 +125,6 @@
     
      private void Cancel()
     {
-        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/ViewDogs");
     }
 }
