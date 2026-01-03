@@ -67,9 +67,4 @@ public class DataAccess
         await context.SaveChangesAsync();
         Console.WriteLine("All data cleared.");
     }
-    
-    public void Dispose()
-    {
-        context?.Dispose();
-    }
 }
