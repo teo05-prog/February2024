@@ -1,0 +1,141 @@
+﻿@page "/ViewDogs"
+@using Blazor.Entity
+@using Blazor.Services
+@rendermode InteractiveServer
+@inject IKennelService KennelService
+
+<style>
+    .dog-card {
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        height: 100%;
+        cursor: pointer;
+    }
+    
+    .dog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .dog-card img {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        background-color: #f0f0f0;
+    }
+    
+    .dog-card-body {
+        padding: 15px;
+        text-align: center;
+        background-color: #f9f9f9;
+    }
+    
+    .dog-card-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+    }
+    
+    .dog-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1050;
+    }
+    
+    .dog-modal-content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+</style>
+
+<h3>View Dogs</h3>
+
+<GenderCount></GenderCount>
+
+@if (dogs == null)
+{
+    <p>Loading dogs...</p>
+}
+else if (!dogs.Any())
+{
+    <p>No dogs found.</p>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var dog in dogs.OrderBy(d => d.ArrivalDate))
+        {
+            <div class="col-md-6 col-lg-4 col-xl-3" @key="dog.Name">
+                <div class="dog-card" @onclick="() => SelectDog(dog)">
+                    <img src="@dog.ImageUrl" alt="@dog.Name" onerror="this.src='https://via.placeholder.com/280x350?text=@dog.Name';"/>
+                    <div class="dog-card-body">
+                        <div class="dog-card-title">@dog.Name</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (selectedDog != null)
+{
+    <div class="dog-modal-overlay" @onclick="CloseModal">
+        <div class="dog-modal-content" @onclick:stopPropagation="true">
+            <div style="padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h5 style="margin: 0; font-weight: 600;">@selectedDog.Name</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                
+                <img src="@selectedDog.ImageUrl" class="img-fluid" alt="@selectedDog.Name" style="max-height: 350px; width: 100%; object-fit: contain; margin-bottom: 15px; border-radius: 8px;"/>
+                
+                <hr style="margin: 15px 0;"/>
+                
+                <div style="line-height: 1.8;">
+                    <p><strong>Sex:</strong> @selectedDog.Sex</p>
+                    <p><strong>Breed:</strong> @selectedDog.Breed</p>
+                    <p><strong>Description:</strong> @selectedDog.Description</p>
+                    <p><strong>Arrival date:</strong> @selectedDog.ArrivalDate.ToShortDateString()</p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IEnumerable<Dog>? dogs;
+    private Dog? selectedDog;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        dogs = await KennelService.GetAllDogsAsync();
+    }
+    
+    private void SelectDog(Dog dog)
+    {
+        selectedDog = dog;
+    }
+    
+    private void CloseModal()
+    {
+        selectedDog = null;
+    }
+}

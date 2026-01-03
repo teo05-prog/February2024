@@ -1,0 +1,64 @@
+﻿@using Blazor.Services
+@inject IKennelService KennelService
+
+<div class="gender-container">
+    <h4>Gender Summary</h4>
+    
+    @if (genderCounts == null)
+    {
+        <p><em>Loading gender count...</em></p>
+    }
+    else if (!genderCounts.Any())
+    {
+        <p><em>No genders found.</em></p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var year in genderCounts.OrderByDescending(y => y.Value).ThenBy(y => y.Key))
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@year.Key</span>
+                    <span class="badge rounded-pill">@year.Value</span>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+<style>
+    .gender-container {
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #37393e;
+    }
+    
+    .gender-container h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #37393e;
+    }
+    
+    .list-group-item {
+        border: 1px solid #dee2e6;
+    }
+    
+    .badge {
+        background-color: #37393e;
+    }
+</style>
+
+@code {
+    private Dictionary<char, int>? genderCounts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allDogs = await KennelService.GetAllDogsAsync();
+        
+        genderCounts = allDogs
+            .GroupBy(g => g.Sex)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+}

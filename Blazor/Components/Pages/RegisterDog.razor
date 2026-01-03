@@ -1,0 +1,130 @@
+﻿@page "/RegisterDog"
+@using Blazor.Entity
+@using Blazor.Services
+@rendermode InteractiveServer
+@inject IKennelService KennelService
+@inject NavigationManager NavigationManager
+
+<h3>Register Dog</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">Name:</label>
+            <input type="text" class="form-control" @bind="name" placeholder="Enter dog name"/>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Sex:</label>
+            <input type="text" class="form-control" @bind="sex" placeholder="Enter sex"/>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Breed:</label>
+            <input type="text" class="form-control" @bind="breed" placeholder="Enter breed"/>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">Image URL:</label>
+            <input type="text" class="form-control" @bind="imageUrl" placeholder="Enter image URL"/>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description:</label>
+            <input type="text" class="form-control" @bind="description" placeholder="Enter description"/>
+        </div>
+
+        <button class="btn btn-primary" @onclick="HandleAddDog">Add dog</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+</div>
+
+@code {
+    private string name = string.Empty;
+    private char sex = 'M';
+    private string breed = string.Empty;
+    private string imageUrl = string.Empty;
+    private string description = string.Empty;
+    private DateTime arrivalDate = DateTime.Now;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    private async Task HandleAddDog()
+    {
+        try
+        {
+            errorMessage = string.Empty;
+            successMessage = string.Empty;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                errorMessage = "Name is required.";
+                return;
+            }
+
+            if (char.IsWhiteSpace(sex))
+            {
+                errorMessage = "Sex is required.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(breed))
+            {
+                errorMessage = "Breed is required.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                errorMessage = "Description is required.";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                errorMessage = "Image URL is required.";
+                return;
+            }
+
+            var newDog = new Dog
+            {
+                Name = name,
+                Sex = sex,
+                Breed = breed,
+                ImageUrl = imageUrl,
+                Description = description,
+                ArrivalDate = arrivalDate
+            };
+
+            await KennelService.AddDogAsync(newDog);
+            successMessage = "Dog added successfully!";
+            name = string.Empty;
+            sex = 'M';
+            breed = string.Empty;
+            imageUrl = string.Empty;
+            description = string.Empty;
+
+            await Task.Delay(2000);
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+    }
+    
+     private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
